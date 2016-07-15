@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+from assemble import assemble
+from execute import execute
+from sys import argv, exit
+
+def read(filename):
+	try:
+		with open(filename, mode = 'rb') as source_file:
+			return source_file.read()
+	except:
+		exit('Cannot open file %s.' % filename)
+
+if len(argv) != 2:
+	exit('Usage: sesos <filename>')
+
+if argv[1].endswith('.sasm'):
+	filename = argv[1][:-4] + 'sbin'
+	binary_code = assemble(read(argv[1]))
+	try:
+		with open(filename, mode = 'wb') as out_file:
+			out_file.write(binary_code)
+	except:
+		exit('Cannot write to file %s.' % filename)
+else:
+	filename = argv[1] if argv[1].endswith('.sbin') else argv[1] + '.sbin'
+	execute(read(filename))

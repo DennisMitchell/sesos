@@ -86,9 +86,8 @@ Because of how the instructions are encoded in Sesos' binary files, certain inst
 * `sub` may not immediately follow `add` or `sub`.
 * `jnz` may not immediately follow `jmp`.
 * `jmp` may not immediately follow `jnz`.
-* The last instruction cannot be `jmp`.
-
-Any number of trailing `jmp` instructions will simply be ignored by the assembler. All other cases are fatal exceptions.
+* `jmp` must be followed by another instruction.
+* `nop` must be followed by another instruction.
 
 ### Special cases
 
@@ -128,8 +127,8 @@ Instruction | Triad sequence
 `add`       | **5**
 `rwd`       | **6**
 `fwd`       | **7**
-`nop`       | **0 1**
-`jne`       | **1 0**
+`nop`       | **1 0**
+`jne`       | **0 1**
 
 ### Instruction arguments
 

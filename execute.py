@@ -77,9 +77,10 @@ def put(_):
 			stdout.buffer.write(bytes([data[data_head]]))
 		else:
 			try:
-				print(chr(data[data_head]), end = '')
+				char = chr(data[data_head])
 			except:
 				exit('Invalid code point (%d) for encoding %s.'	% (data[data_head], getlocale()[1]))
+			print(char, end = '')
 	code_head += 1
 
 def sub(argument):
@@ -88,18 +89,33 @@ def sub(argument):
 	data[data_head] &= mask
 	code_head += 1
 
+def set_entry_marker(operator):
+	global level
+	level += 1
+	markers_open.append(code_index)
+	code.append([operator, 1])
+
+def set_exit_marker(operator):
+	global code_head, level
+	level -= 1
+	code_head = min(level, code_head)
+	marker = level if level < 0 else markers_open.pop()
+	markers[marker] = code_index
+	markers[code_index] = marker
+	code.append([operator, 1])
+
 global mask, numeric_input, numeric_output
+code = []
 code_head = 0
+code_index = -1
 data = defaultdict(lambda: 0)
 data_head = 0
+level = 0
 markers = {}
+markers_open = []
 
 def execute(source):
-	global code_head, mask, numeric_input, numeric_output
-	code = []
-	code_index = -1
-	level = 0
-	markers_open = []
+	global code_head, code_index, level, mask, numeric_input, numeric_output
 	operators = (jmp, jnz, get, put, sub, add, rwd, fwd)
 	operators_rle = ({sub}, {add}, {sub, add}, {rwd}, {fwd}, {rwd, fwd})
 	operators_odd = (add, fwd)
@@ -120,23 +136,22 @@ def execute(source):
 		if {operator_last, operator} in operators_rle:
 			code[-1][1] = code[-1][1] << 1 | (operator in operators_odd)
 			continue
-		elif operator_last == jmp and operator == jnz:
-			code[-1][0] = nop
-			continue
-		elif operator_last == jnz and operator == jmp:
-			code[-1][0] = jne
-			continue
-		code.append([operator, 1])
 		code_index +=1
+		operator_next = operators[code_integer & 7]
 		if operator == jmp:
-			level += 1
-			markers_open.append(code_index)
-		if operator == jnz:
-			level -= 1
-			code_head = min(level, code_head)
-			marker = level if level < 0 else markers_open.pop()
-			markers[marker] = code_index
-			markers[code_index] = marker
+			if operator_next != jnz:
+				set_entry_marker(jmp)
+			else:
+				set_exit_marker(jne)
+				code_integer >>= 3
+		elif operator == jnz:
+			if operator_next != jmp or code_integer == 0:
+				set_exit_marker(jnz)
+			else:
+				set_entry_marker(nop)
+				code_integer >>= 3
+		else:
+			code.append([operator, 1])
 
 	level -= code_head
 	code.extend([[jnz, 1]] * level)

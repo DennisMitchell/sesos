@@ -32,7 +32,7 @@ def assemble(source):
 				except:
 					exit('Unrecognized instruction on line %u: %s' % (linenumber, line))
 				if {last_index, instruction_index} in invalid_pairs:
-					exit('Invalid instruction sequence on line %u: %s may not follow %s' % (linenumber, line, last_line))
+					exit('Invalid instruction sequence on line %u: %s may not follow %s.' % (linenumber, line, last_line))
 				if instruction_index < 4:
 					if len(tokens) > 1:
 						exit('Too many arguments on line %u: %s' % (linenumber, line))
@@ -49,8 +49,12 @@ def assemble(source):
 						append(instruction_index | bit)
 				else:
 					instruction_index -= 7
-					append(instruction_index >> 1, instruction_index & 1)
+					append(instruction_index & 1, instruction_index >> 1)
+					instruction_index -= 1
 				last_index = instruction_index
+				last_linenumber = linenumber
 				last_line = line
 
+	if last_index == 0:
+		exit('Invalid instruction sequence on line %u: %s must be followed by another instruction.' % (last_linenumber, last_line))
 	return code_integer.to_bytes(-(code_integer.bit_length() // -8), 'little')

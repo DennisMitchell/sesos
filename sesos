@@ -3,6 +3,7 @@
 from assemble import assemble
 from execute import execute
 from sys import argv, exit
+from signal import SIGINT, signal
 
 def read(filename):
 	try:
@@ -10,6 +11,8 @@ def read(filename):
 			return source_file.read()
 	except:
 		exit('Cannot open file %s.' % filename)
+
+signal(SIGINT, lambda signal, _:exit(128 + signal))
 
 if len(argv) != 2:
 	exit('Usage: sesos <filename>')

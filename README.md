@@ -8,7 +8,7 @@ Unlike the latter, it is concise, can be typed easily, has somewhat flexible I/O
 
 The typable way of writing Sesos programs is SASM (**s**esos **as**se**m**bly). Each non-empty line of SASM must contain an assembler directive or an instruction. Additionally, inline comments can be used by prefixing them with a `;`.
 
-The token(s) of each line may be indented, followed and separated by any combination of tabulators and spaces. The lines itself may be separated by any combination of linefeeds, carriage returns, vertical tabs and formfeeds.
+The token(s) of each line may be indented, followed and separated by any combination of tabulators and spaces. The lines themselves may be separated by any combination of linefeeds, carriage returns, vertical tabs and formfeeds.
 
 ### Assembler directives
 
@@ -101,7 +101,7 @@ Finally, if the entry marker corresponding to a `jnz` instruction is the first (
 
 SBIN (**s**esos **bin**ary) files can be created either by hand or by assembling the corresponding SASM.
 
-A binary Sesos file consist of an arbitrary number of triads (consisting of three bytes) that encode directives, instructions, or instructions arguments. These triads are padded by adding or removing trailing **0** bits to reach an entire number of bytes.
+A binary Sesos file consist of an arbitrary number of triads (consisting of three bits each) that encode directives, instructions, or instructions arguments. These triads are padded by adding or removing trailing **0** bits to reach an entire number of bytes.
 
 Alternatively, an SBIN file can be viewed as a single non-negative integer **n**, expressed in base 256 in little-endian byte order.
 

@@ -58,7 +58,7 @@ When EOF is reached, the cell under the data head is zeroed. For numeric input, 
 
     put
 
-This instruction write the value of the cell under the data head the data head. The exact behavior depends on the assembler directives.
+This instruction write the value of the cell under the data to STDOUT. The exact behavior depends on the assembler directives.
 
     jmp
 

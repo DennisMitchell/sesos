@@ -54,7 +54,7 @@ This instruction subtracts **n** from the cell under the data head. The exact be
 
 This instruction reads a single cell value from STDIN and writes it to the cell under the data head. The exact behavior depends on the assembler directives.
 
-When EOF is reached, the cell under the data head is zeroed. For numeric input, an invalid signed [integer literal] will also zero the cell. For character input, a byte sequence that cannot be decoded in the default locale in a runtime error.
+When EOF is reached, the cell under the data head is zeroed. For numeric input, an invalid signed [integer literal] will also zero the cell. For character input, a byte sequence that cannot be decoded in the default locale is a runtime error.
 
     put
 

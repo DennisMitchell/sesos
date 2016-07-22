@@ -17,44 +17,44 @@ def assemble(source):
 	last_index = -1
 
 	for linenumber, line in enumerate(source.splitlines(), 1):
-		tokens = line.split(b';')[0].split()
-		if len(tokens) > 2:
-			exit('Too many arguments on line %u: %s' % (linenumber, line))
-		if tokens:
-			if tokens[0] == b'set':
-				try:
-					code_integer |= 1 << flags.index(tokens[1])
-				except:
-					exit('Missing or invalid argument to set directive on line %u: %s' % (linenumber, line))
-			else:
-				try:
-					instruction_index = instructions.index(tokens[0])
-				except:
-					exit('Unrecognized instruction on line %u: %s' % (linenumber, line))
-				if {last_index, instruction_index} in invalid_pairs:
-					exit('Invalid instruction sequence on line %u: %s may not follow %s.' % (linenumber, line, last_line))
-				if instruction_index < 4:
-					if len(tokens) > 1:
-						exit('Too many arguments on line %u: %s' % (linenumber, line))
-					append(instruction_index)
-				elif instruction_index < 8:
+		for command in line.split(b';')[0].split(b','):
+			command = command.lstrip()
+			tokens = command.split()
+			if len(tokens) > 2:
+				exit('Too many arguments in command %s on line %u.' % (command, linenumber))
+			if tokens:
+				if tokens[0] == b'set':
 					try:
-						append(instruction_index)
-						instruction_index &= -2
-						repetitions = int(tokens[1])
-						assert repetitions > 0
+						code_integer |= 1 << flags.index(tokens[1])
 					except:
-						exit('Missing or invalid instruction argument on line %u: %s' % (linenumber, line))
-					for bit in map(int, bin(repetitions)[3:]):
-						append(instruction_index | bit)
+						exit('Missing or invalid argument to set directive in command %s on line %u.' % (command, linenumber))
 				else:
-					instruction_index -= 7
-					append(instruction_index & 1, instruction_index >> 1)
-					instruction_index -= 1
-				last_index = instruction_index
-				last_linenumber = linenumber
-				last_line = line
+					try:
+						instruction_index = instructions.index(tokens[0])
+					except:
+						exit('Unrecognized instruction %s on line %u.' % (command, linenumber))
+					if {last_index, instruction_index} in invalid_pairs:
+						exit('Invalid instruction sequence on line %u: %s may not follow %s.' % (linenumber, command, last_command))
+					if instruction_index < 4:
+						if len(tokens) > 1:
+							exit('Too many arguments in command %s on line %u.' % (line, linenumber))
+						append(instruction_index)
+					elif instruction_index < 8:
+						try:
+							append(instruction_index)
+							instruction_index &= -2
+							repetitions = int(tokens[1])
+							assert repetitions > 0
+						except:
+							exit('Missing or invalid argument to instruction in command %s on line %u.' % (command, linenumber))
+						for bit in map(int, bin(repetitions)[3:]):
+							append(instruction_index | bit)
+					else:
+						append((instruction_index - 7) & 1, (instruction_index - 7) >> 1)
+					last_index = instruction_index
+					last_command = command
+					last_linenumber = linenumber
 
-	if last_index == 0:
-		exit('Invalid instruction sequence on line %u: %s must be followed by another instruction.' % (last_linenumber, last_line))
+	if last_index % 8 == 0:
+		exit('Invalid instruction sequence on line %u: Command %s must be followed by another instruction.' % (last_line, last_command))
 	return code_integer.to_bytes(-(code_integer.bit_length() // -8), 'little')

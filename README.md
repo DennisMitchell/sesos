@@ -6,9 +6,9 @@ Unlike the latter, it is concise, can be typed easily, has somewhat flexible I/O
 
 ## Sesos assembly
 
-The typable way of writing Sesos programs is SASM (**s**esos **as**se**m**bly). Each non-empty line of SASM must contain an assembler directive or an instruction. Additionally, inline comments can be used by prefixing them with a `;`.
+The typable way of writing Sesos programs is SASM (**s**esos **as**se**m**bly). Each non-empty line of SASM must contain an assembler directive or an instruction. Every line can contain multiple commands, which must be separated by `,`. Additionally, inline comments can be used by prefixing them with a `;`.
 
-The token(s) of each line may be indented, followed and separated by any combination of tabulators and spaces. The lines themselves may be separated by any combination of linefeeds, carriage returns, vertical tabs and formfeeds.
+The tokens of each command &ndash; and the commands themselves &ndash; may be indented, followed and separated by any combination of tabulators and spaces. The lines themselves may be separated by any combination of linefeeds, carriage returns, vertical tabs and formfeeds.
 
 ### Assembler directives
 

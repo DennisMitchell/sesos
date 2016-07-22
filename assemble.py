@@ -55,6 +55,6 @@ def assemble(source):
 					last_command = command
 					last_linenumber = linenumber
 
-	if last_index % 8 == 0:
-		exit('Invalid instruction sequence on line %u: Command %s must be followed by another instruction.' % (last_line, last_command))
+	if last_index == 0:
+		exit('Invalid instruction sequence on line %u: Command %s must be followed by another instruction.' % (last_linenumber, last_command))
 	return code_integer.to_bytes(-(code_integer.bit_length() // -8), 'little')

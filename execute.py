@@ -95,7 +95,7 @@ def sub(argument):
 	code_head += 1
 
 def say_and_exit(exit_code):
-	print('Executed %u commands.' % commands)
+	print('\nExecuted %u commands.' % commands)
 	exit(exit_code)
 
 def set_entry_marker(operator):

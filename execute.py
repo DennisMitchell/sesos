@@ -1,6 +1,6 @@
 from collections import defaultdict
 from locale import getlocale
-from sys import exit, stdin, stdout
+from sys import exit, stderr, stdin, stdout
 
 def add(argument):
 	global code_head
@@ -68,19 +68,24 @@ def rwd(argument):
 	data_head -= argument
 	code_head += 1
 
-def put(_):
+def put(debug):
 	global code_head
 	if numeric_output:
 		print(data[data_head])
 	else:
 		if mask > 0:
-			stdout.buffer.write(bytes([data[data_head]]))
+			if debug:
+				print(bytes([data[data_head]]))
+			else:
+				stdout.buffer.write(bytes([data[data_head]]))
 		else:
 			try:
-				char = chr(data[data_head])
+				if debug:
+					print(repr(chr(data[data_head])))
+				else:
+					print(chr(data[data_head]), end = '')
 			except:
 				exit('Invalid code point (%d) for encoding %s.'	% (data[data_head], getlocale()[1]))
-			print(char, end = '')
 	code_head += 1
 
 def sub(argument):
@@ -88,6 +93,10 @@ def sub(argument):
 	data[data_head] -= argument
 	data[data_head] &= mask
 	code_head += 1
+
+def say_and_exit(exit_code):
+	print('Executed %u commands.' % commands, file = stderr)
+	exit(exit_code)
 
 def set_entry_marker(operator):
 	global level
@@ -108,14 +117,15 @@ global mask, numeric_input, numeric_output
 code = []
 code_head = 0
 code_index = -1
-data = defaultdict(lambda: 0)
+commands = 0
+data = defaultdict(lambda: 0, {0: 0})
 data_head = 0
 level = 0
 markers = {}
 markers_open = []
 
-def execute(source):
-	global code_head, code_index, level, mask, numeric_input, numeric_output
+def execute(source, count, debug):
+	global code_head, code_index, commands, level, mask, numeric_input, numeric_output
 	operators = (jmp, jnz, get, put, sub, add, rwd, fwd)
 	operators_rle = ({sub}, {add}, {sub, add}, {rwd}, {fwd}, {rwd, fwd})
 	operators_odd = (add, fwd)
@@ -155,7 +165,7 @@ def execute(source):
 
 	level -= code_head
 	code.extend([[jnz, 1]] * level)
-	code.append([exit, 0])
+	code.append([say_and_exit if count else exit, 0])
 	code.extend([[jmp, 1]] * -code_head)
 
 	while markers_open:
@@ -172,4 +182,19 @@ def execute(source):
 
 	while True:
 		operator, argument = code[code_head]
-		operator(argument)
+		if debug:
+			print('    %s %s' % (operator.__name__, argument), file = stderr)
+			tape = data.keys()
+			min_tape, max_tape = min(tape), max(tape)
+			len_tape = max(len(str(min_tape)), len(str(max_tape)))
+			if operator == put:
+				put(True)
+			else:
+				operator(argument)
+				print(file = stderr)
+			for key in range(min_tape, max_tape + 1):
+				print('    %*d: %d' % (len_tape, key, data[key]), file = stderr)
+
+		else:
+			operator(argument)
+		commands += 1

@@ -144,13 +144,20 @@ Essentially, the argument is represented as a big-endian base 2 literal, where t
 
 ### Generating SBIN files
 
-To generate an SBIN file with the interpreter, save the corresponding SASM in a file with extension `sasm`, and run the interpreter with that filename as its sole command-line argument.
+To generate an SBIN file with the interpreter, save the corresponding SASM in a file with extension `sasm`, and run the interpreter with the `-a` option and that file's basename as command-line arguments.
 
 This will create a binary file with the same basename and extension `sbin`.
 
 ### Executing SBIN files
 
-To execute an SBIN file &ndash; which must have the extension `sbin`, run the interpreter with the full filename &ndash; or, alternatively, its basename &ndash; as its sole command-line argument.
+To execute an SBIN file &ndash; which must have the extension `sbin` &ndash; run the interpreter with the file's basename as command-line argument.
+
+You can optionally set any combination of the following options.
+
+Option | Description
+:-----:|------------
+`-c`   | Count how many commands are executed.
+`-d`   | Print debugging information for each executed command.
 
 ## Online interpreters
 

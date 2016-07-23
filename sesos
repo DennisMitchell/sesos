@@ -13,18 +13,39 @@ def read(filename):
 		exit('Cannot open file %s.' % filename)
 
 signal(SIGINT, lambda signal, _:exit(128 + signal))
+flags = {'a': False, 'c': False, 'd': False}
+usage = 'sesos [-%s] <basename>' % ''.join(flags.keys())
 
-if len(argv) != 2:
-	exit('Usage: sesos <filename>')
+while len(argv) > 2 and argv[1].startswith('-'):
+	for char in argv.pop(1)[1:]:
+		if char in flags.keys():
+			flags[char] = True
+		else:
+			exit(usage)
 
-if argv[1].endswith('.sasm'):
-	filename = argv[1][:-4] + 'sbin'
-	binary_code = assemble(read(argv[1]))
+if len(argv) != 2 or argv[1].startswith('-'):
+	exit(usage)
+
+extensions = ('.sbin', '.sasm')
+filename_in = argv[1] + extensions[flags['a']]
+
+if flags['a']:
+	filename_in = argv[1] + '.sasm'
+	filename_out = argv[1] + '.sbin'
 	try:
-		with open(filename, mode = 'wb') as out_file:
-			out_file.write(binary_code)
+		assembly_code = read(filename_in)
 	except:
-		exit('Cannot write to file %s.' % filename)
+		exit('Cannot read from file %s.' % repr(filename_in))
+	binary_code = assemble(assembly_code)
+	try:
+		with open(filename_out, mode = 'wb') as file_out:
+			file_out.write(binary_code)
+	except:
+		exit('Cannot write to file %s.' % repr(filename_out))
 else:
-	filename = argv[1] if argv[1].endswith('.sbin') else argv[1] + '.sbin'
-	execute(read(filename))
+	filename = argv[1] + '.sbin'
+	try:
+		code = read(filename)
+	except:
+		exit('Cannot read from file %s.' % repr(filename))
+	execute(code, count = flags['c'], debug = flags['d'])

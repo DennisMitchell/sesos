@@ -68,22 +68,22 @@ def rwd(argument):
 	data_head -= argument
 	code_head += 1
 
-def put(debug):
+def put(do_not_debug):
 	global code_head
 	if numeric_output:
 		print(data[data_head])
 	else:
 		if mask > 0:
-			if debug:
-				print(bytes([data[data_head]]))
-			else:
+			if do_not_debug:
 				stdout.buffer.write(bytes([data[data_head]]))
+			else:
+				print(bytes([data[data_head]]))
 		else:
 			try:
-				if debug:
-					print(repr(chr(data[data_head])))
-				else:
+				if do_not_debug:
 					print(chr(data[data_head]), end = '')
+				else:
+					print(repr(chr(data[data_head])))
 			except:
 				exit('Invalid code point (%d) for encoding %s.'	% (data[data_head], getlocale()[1]))
 	code_head += 1
@@ -188,7 +188,7 @@ def execute(source, count, debug):
 			min_tape, max_tape = min(tape), max(tape)
 			len_tape = max(len(str(min_tape)), len(str(max_tape)))
 			if operator == put:
-				put(True)
+				put(do_not_debug = False)
 			else:
 				operator(argument)
 				print(file = stderr)

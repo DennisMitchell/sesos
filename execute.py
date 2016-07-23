@@ -95,7 +95,7 @@ def sub(argument):
 	code_head += 1
 
 def say_and_exit(exit_code):
-	print('Executed %u commands.' % commands, file = stderr)
+	print('Executed %u commands.' % commands)
 	exit(exit_code)
 
 def set_entry_marker(operator):
@@ -183,7 +183,7 @@ def execute(source, count, debug):
 	while True:
 		operator, argument = code[code_head]
 		if debug:
-			print('    %s %s' % (operator.__name__, argument), file = stderr)
+			print('    %s %s' % (operator.__name__, argument))
 			tape = data.keys()
 			min_tape, max_tape = min(tape), max(tape)
 			len_tape = max(len(str(min_tape)), len(str(max_tape)))
@@ -193,7 +193,7 @@ def execute(source, count, debug):
 				operator(argument)
 				print(file = stderr)
 			for key in range(min_tape, max_tape + 1):
-				print('    %*d: %d' % (len_tape, key, data[key]), file = stderr)
+				print('    %*d: %d' % (len_tape, key, data[key]))
 
 		else:
 			operator(argument)

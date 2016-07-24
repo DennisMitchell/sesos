@@ -184,17 +184,17 @@ def execute(source, count, debug):
 		operator, argument = code[code_head]
 		if debug:
 			print('    %s %s' % (operator.__name__, argument))
-			tape = data.keys()
-			min_tape, max_tape = min(tape), max(tape)
-			len_tape = max(len(str(min_tape)), len(str(max_tape)))
 			if operator == put:
 				put(do_not_debug = False)
 			else:
 				operator(argument)
-				print(file = stderr)
+			data[data_head]
+			tape = data.keys()
+			min_tape, max_tape = min(tape), max(tape)
+			len_tape = max(len(str(min_tape)), len(str(max_tape)))
 			for key in range(min_tape, max_tape + 1):
-				print('    %*d: %d' % (len_tape, key, data[key]))
-
+				print('    %*d%s %d' % (len_tape, key, ':>'[key == data_head], data[key]))
+			print()
 		else:
 			operator(argument)
 		commands += 1

@@ -84,6 +84,7 @@ Because of how the instructions are encoded in Sesos' binary files, certain inst
 * `rwd` may not immediately follow `fwd` or `rwd`.
 * `add` may not immediately follow `add` or `sub`.
 * `sub` may not immediately follow `add` or `sub`.
+* `get` may not immediately follow `add` or `sub`.
 * `jnz` may not immediately follow `jmp`.
 * `jmp` may not immediately follow `jnz`.
 * `jmp` must be followed by another instruction.
@@ -111,7 +112,7 @@ Here, each **t<sub>k</sub>** represents a triad.
 
 ### Directives
 
-The first triad is a bit field. If `mask` is set, so is the least significant bit **t<sub>0</sub>**; if `numin` is set, so is the middle bit **t<sub>0</sub>**; if `numout` is set, so is the most significant bit of **t<sub>0</sub>**.
+The first triad is a bit field. If `mask` is set, so is the least significant bit of **t<sub>0</sub>**; if `numin` is set, so is the middle bit of **t<sub>0</sub>**; if `numout` is set, so is the most significant bit of **t<sub>0</sub>**.
 
 ### Instructions
 
@@ -134,13 +135,9 @@ Instruction | Triad sequence
 
 Arguments to `add`, `sub`, `fwd`, and `rwd` are encoded as zero or more triads, immediately after the corresponding instructions.
 
-For `add` and `sub`, **4** (`sub`) represents an even digit, while **5** (`add`) represents an odd digit. Likewise, for `fwd` and `rwd`, **6** (`rwd`) represents an even digit, while **7** (`fwd`) represents an odd digit.
+The arguments of `add` and `sub` are encoded in big-endian bijective ternary with an offset of **1**. The argument of both instructions start out as **1**. For each additional triad, the the argument is tripled and the value of the triad is added to it. Triad **2** (`get`) has a value of **-1**, triad **4** (`sub`) a value of **0**, and triad **5** (`add`) a value of **1**.
 
-The argument of each of these four instructions starts out as **1**. If followed by zero triads encoding their arguments, **1** is the final value.
-
-Each digit triad that follows the instruction doubles the value of the argument. Additionally, if the digit is odd, it increments the argument once after doubling it.
-
-Essentially, the argument is represented as a big-endian base 2 literal, where the instruction itself serves as the most-significant digit.
+In similar fashion, the arguments of `fwd` and `rwd` are encoded in big-endian bijective binary, also with an offset of **1**. The argument of both instructions start out as **1**. For each additional triad, the the argument is doubled and the value of the triad is added to it. Triad **6** (`rwd`) has a value of **0** and triad **7** (`fwd`) a value of **1**.
 
 ### Generating SBIN files
 

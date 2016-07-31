@@ -11,7 +11,7 @@ code_shift = 0
 def assemble(source):
 	global code_integer
 	flags = b'mask numin numout'.split()
-	#                  0   1   2   3   4   5   6   7   8   9
+	#                 0   1   2   3   4   5   6   7   8   9
 	instructions = b'jmp jnz get put sub add rwd fwd nop jne'.split()
 	invalid_pairs = ((0, 1), (1, 0), (4, 2), (4, 4), (4, 5), (5, 2), (5, 4), (5, 5), (6, 6), (6, 7), (7, 6), (7, 7))
 	last_index = -1
@@ -51,13 +51,12 @@ def assemble(source):
 							for bit in map(int, bin(repetitions)[3:]):
 								append(instruction_index | bit)
 						else:
-							#bijective ternary, little-endian
 							repetitions -= 1
 							to_append = []
 							while repetitions > 0:
-								to_append = [(2,4,5)[(repetitions-1)%3]] + to_append
-								repetitions = (repetitions-1)//3
-							for instruction in to_append:
+								repetitions, digit = divmod(repetitions - 1, 3)
+								to_append.append((2, 4, 5)[digit])
+							for instruction in reversed(to_append):
 								append(instruction)
 					else:
 						append((instruction_index - 7) & 1)

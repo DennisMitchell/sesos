@@ -128,7 +128,7 @@ def execute(source, count, debug):
 	global code_head, code_index, commands, level, mask, numeric_input, numeric_output
 	operators = (jmp, jnz, get, put, sub, add, rwd, fwd)
 	operators_rle = ((sub, sub), (sub, add), (sub, get), (add, sub), (add, add), (add, get), (rwd, rwd), (rwd, fwd), (fwd, rwd), (fwd, fwd))
-	operators_value = {get:1, sub:2, add:3}
+	operators_value = {get: 1, sub: 2, add: 3}
 	base3_operators = (sub, add)
 
 	code_integer = int.from_bytes(source, 'little')
@@ -174,7 +174,7 @@ def execute(source, count, debug):
 	code.extend([[jnz, 1]] * level)
 	code.append([say_and_exit if count else exit, 0])
 	code.extend([[jmp, 1]] * -code_head)
-	
+
 	while markers_open:
 		code_index += 1
 		marker = markers_open.pop()

@@ -127,8 +127,9 @@ markers_open = []
 def execute(source, count, debug):
 	global code_head, code_index, commands, level, mask, numeric_input, numeric_output
 	operators = (jmp, jnz, get, put, sub, add, rwd, fwd)
-	operators_rle = ({sub}, {add}, {sub, add}, {rwd}, {fwd}, {rwd, fwd})
-	operators_odd = (add, fwd)
+	operators_rle = ((sub, sub), (sub, add), (sub, get), (add, sub), (add, add), (add, get), (rwd, rwd), (rwd, fwd), (fwd, rwd), (fwd, fwd))
+	operators_value = {get:1, sub:2, add:3}
+	base3_operators = (sub, add)
 
 	code_integer = int.from_bytes(source, 'little')
 
@@ -143,9 +144,15 @@ def execute(source, count, debug):
 		operator_last = code[-1][0] if code else nop
 		operator = operators[code_integer & 7]
 		code_integer >>= 3
-		if {operator_last, operator} in operators_rle:
-			code[-1][1] = code[-1][1] << 1 | (operator in operators_odd)
-			continue
+		while (operator_last, operator) in operators_rle:
+			if operator_last in base3_operators:
+				code[-1][1] = code[-1][1] *3 + operators_value[operator]
+			else:
+				code[-1][1] = code[-1][1] << 1 | (operator == fwd)
+			operator = operators[code_integer & 7]
+			code_integer >>= 3
+		if operator_last in base3_operators:
+			code[-1][1] += 1
 		code_index +=1
 		operator_next = operators[code_integer & 7]
 		if operator == jmp:
@@ -161,13 +168,13 @@ def execute(source, count, debug):
 				set_entry_marker(nop)
 				code_integer >>= 3
 		else:
-			code.append([operator, 1])
+			code.append([operator, 0 if operator in base3_operators else 1])
 
 	level -= code_head
 	code.extend([[jnz, 1]] * level)
 	code.append([say_and_exit if count else exit, 0])
 	code.extend([[jmp, 1]] * -code_head)
-
+	
 	while markers_open:
 		code_index += 1
 		marker = markers_open.pop()

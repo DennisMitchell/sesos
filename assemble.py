@@ -1,10 +1,9 @@
 from sys import exit
 
-def append(*instruction_indices):
+def append(instruction_index):
 	global code_integer, code_shift
-	for index in instruction_indices:
-		code_shift += 3
-		code_integer |= index << code_shift
+	code_shift += 3
+	code_integer |= instruction_index << code_shift
 
 code_integer = 0
 code_shift = 0
@@ -12,8 +11,9 @@ code_shift = 0
 def assemble(source):
 	global code_integer
 	flags = b'mask numin numout'.split()
+	#                  0   1   2   3   4   5   6   7   8   9
 	instructions = b'jmp jnz get put sub add rwd fwd nop jne'.split()
-	invalid_pairs = ({0, 1}, {4, 4}, {4, 5}, {5, 5}, {6, 6}, {6, 7}, {7, 7})
+	invalid_pairs = ((0, 1), (1, 0), (4, 2), (4, 4), (4, 5), (5, 2), (5, 4), (5, 5), (6, 6), (6, 7), (7, 6), (7, 7))
 	last_index = -1
 
 	for linenumber, line in enumerate(source.splitlines(), 1):
@@ -33,7 +33,7 @@ def assemble(source):
 						instruction_index = instructions.index(tokens[0])
 					except:
 						exit('Unrecognized instruction %s on line %u.' % (command, linenumber))
-					if {last_index, instruction_index} in invalid_pairs:
+					if (last_index, instruction_index) in invalid_pairs:
 						exit('Invalid instruction sequence on line %u: %s may not follow %s.' % (linenumber, command, last_command))
 					if instruction_index < 4:
 						if len(tokens) > 1:
@@ -47,10 +47,21 @@ def assemble(source):
 							assert repetitions > 0
 						except:
 							exit('Missing or invalid argument to instruction in command %s on line %u.' % (command, linenumber))
-						for bit in map(int, bin(repetitions)[3:]):
-							append(instruction_index | bit)
+						if instruction_index & 2:
+							for bit in map(int, bin(repetitions)[3:]):
+								append(instruction_index | bit)
+						else:
+							#bijective ternary, little-endian
+							repetitions -= 1
+							to_append = []
+							while repetitions > 0:
+								to_append = [(2,4,5)[(repetitions-1)%3]] + to_append
+								repetitions = (repetitions-1)//3
+							for instruction in to_append:
+								append(instruction)
 					else:
-						append((instruction_index - 7) & 1, (instruction_index - 7) >> 1)
+						append((instruction_index - 7) & 1)
+						append((instruction_index - 7) >> 1)
 					last_index = instruction_index
 					last_command = command
 					last_linenumber = linenumber

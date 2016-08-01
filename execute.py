@@ -128,7 +128,7 @@ def execute(source, count, debug):
 	global code_head, code_index, commands, level, mask, numeric_input, numeric_output
 	operators = (jmp, jnz, get, put, sub, add, rwd, fwd)
 	operators_rle = ((sub, sub), (sub, add), (sub, get), (add, sub), (add, add), (add, get), (rwd, rwd), (rwd, fwd), (fwd, rwd), (fwd, fwd))
-	operators_value = {get: 1, sub: 2, add: 3}
+	operators_value = {rwd: 0, fwd: 1, get: -1, sub: 0, add: 1}
 	base3_operators = (sub, add)
 
 	code_integer = int.from_bytes(source, 'little')
@@ -144,15 +144,10 @@ def execute(source, count, debug):
 		operator_last = code[-1][0] if code else nop
 		operator = operators[code_integer & 7]
 		code_integer >>= 3
-		while (operator_last, operator) in operators_rle:
-			if operator_last in base3_operators:
-				code[-1][1] = code[-1][1] *3 + operators_value[operator]
-			else:
-				code[-1][1] = code[-1][1] << 1 | (operator == fwd)
-			operator = operators[code_integer & 7]
-			code_integer >>= 3
-		if operator_last in base3_operators:
-			code[-1][1] += 1
+		if (operator_last, operator) in operators_rle:
+			code[-1][1] *= 2 + (operator_last in base3_operators)
+			code[-1][1] += operators_value[operator]
+			continue
 		code_index +=1
 		operator_next = operators[code_integer & 7]
 		if operator == jmp:
@@ -168,7 +163,7 @@ def execute(source, count, debug):
 				set_entry_marker(nop)
 				code_integer >>= 3
 		else:
-			code.append([operator, 0 if operator in base3_operators else 1])
+			code.append([operator, 1])
 
 	level -= code_head
 	code.extend([[jnz, 1]] * level)
